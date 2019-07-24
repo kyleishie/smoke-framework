@@ -39,20 +39,29 @@ internal struct JSONErrorEncoder: ErrorEncoder {
  request and response payloads.
  */
 public struct JSONPayloadHTTP1OperationDelegate: HTTP1OperationDelegate {
-    public init() {
-        
+    
+    private let queryDecoder: () -> QueryDecoder
+    private let pathDecoder: () -> HTTPPathDecoder
+    private let headersDecoder: () -> HTTPHeadersDecoder
+    
+    public init(queryDecoder: @escaping @autoclosure () -> QueryDecoder = QueryDecoder(),
+                pathDecoder: @escaping @autoclosure () ->  HTTPPathDecoder = HTTPPathDecoder(),
+                headersDecoder: @escaping @autoclosure () -> HTTPHeadersDecoder = HTTPHeadersDecoder()) {
+        self.queryDecoder = queryDecoder
+        self.pathDecoder = pathDecoder
+        self.headersDecoder = headersDecoder
     }
     
     public func getInputForOperation<InputType: OperationHTTP1InputProtocol>(requestHead: SmokeHTTP1RequestHead,
                                                                              body: Data?) throws -> InputType {
         
         func queryDecodableProvider() throws -> InputType.QueryType {
-            return try QueryDecoder().decode(InputType.QueryType.self,
+            return try queryDecoder().decode(InputType.QueryType.self,
                                              from: requestHead.query)
         }
         
         func pathDecodableProvider() throws -> InputType.PathType {
-            return try HTTPPathDecoder().decode(InputType.PathType.self,
+            return try pathDecoder().decode(InputType.PathType.self,
                                                 fromShape: requestHead.pathShape)
         }
         
@@ -69,7 +78,7 @@ public struct JSONPayloadHTTP1OperationDelegate: HTTP1OperationDelegate {
                 requestHead.httpRequestHead.headers.map { header in
                     return (header.name, header.value)
             }
-            return try HTTPHeadersDecoder().decode(InputType.HeadersType.self,
+            return try headersDecoder().decode(InputType.HeadersType.self,
                                                    from: headers)
         }
         
