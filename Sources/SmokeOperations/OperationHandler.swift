@@ -23,12 +23,12 @@ import LoggerAPI
  bodies from and to the shapes required by operation handlers.
  */
 public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType> {
-    public typealias OperationResultValidatableInputFunction<InputType: Validatable>
-        = (_ input: InputType, _ requestHead: RequestHeadType, _ context: ContextType,
-        _ responseHandler: ResponseHandlerType) -> ()
+    
+    public typealias OperationResultValidatableInputFunction<InputType: Validatable> =
+        (_ input: InputType, _ requestHead: RequestHeadType, _ context: ContextType, _ responseHandler: ResponseHandlerType) -> ()
+    
     public typealias OperationResultDataInputFunction
-        = (_ requestHead: RequestHeadType, _ body: Data?, _ context: ContextType,
-        _ responseHandler: ResponseHandlerType, _ invocationStrategy: InvocationStrategy) -> ()
+        = (_ requestHead: RequestHeadType, _ body: Data?, _ context: ContextType, _ responseHandler: ResponseHandlerType, _ invocationStrategy: InvocationStrategy) -> ()
     
     private let operationFunction: OperationResultDataInputFunction
     

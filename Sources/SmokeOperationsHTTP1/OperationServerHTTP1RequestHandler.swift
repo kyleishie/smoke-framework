@@ -31,12 +31,12 @@ internal struct PingParameters {
  incoming Http request as an operation.
  */
 struct OperationServerHTTP1RequestHandler<ContextType, SelectorType>: HTTP1RequestHandler
-        where SelectorType: SmokeHTTP1HandlerSelector, SelectorType.ContextType == ContextType,
-        SmokeHTTP1RequestHead == SelectorType.DefaultOperationDelegateType.RequestHeadType,
-        HTTP1ResponseHandler == SelectorType.DefaultOperationDelegateType.ResponseHandlerType {
+    where SelectorType: SmokeHTTP1HandlerSelector, SelectorType.ContextType == ContextType,
+    SmokeHTTP1RequestHead == SelectorType.DefaultOperationDelegateType.RequestHeadType,
+HTTP1ResponseHandler == SelectorType.DefaultOperationDelegateType.ResponseHandlerType {
     let handlerSelector: SelectorType
     let context: ContextType
-
+    
     public func handle(requestHead: HTTPRequestHead, body: Data?, responseHandler: HTTP1ResponseHandler,
                        invocationStrategy: InvocationStrategy) {
         // this is the ping url
@@ -51,25 +51,23 @@ struct OperationServerHTTP1RequestHandler<ContextType, SelectorType>: HTTP1Reque
         let uriComponents = requestHead.uri.split(separator: "?", maxSplits: 1)
         let path = String(uriComponents[0])
         let query = uriComponents.count > 1 ? String(uriComponents[1]) : ""
-
+        
         // get the handler to use
         let handler: OperationHandler<ContextType, SmokeHTTP1RequestHead, HTTP1ResponseHandler>
         let shape: Shape
         let defaultOperationDelegate = handlerSelector.defaultOperationDelegate
         
         do {
-            (handler, shape) = try handlerSelector.getHandlerForOperation(
-                path,
-                httpMethod: requestHead.method)
+            (handler, shape) = try handlerSelector.getHandlerForOperation(path, httpMethod: requestHead.method)
+            
         } catch SmokeOperationsError.invalidOperation(reason: let reason) {
             let smokeHTTP1RequestHead = SmokeHTTP1RequestHead(httpRequestHead: requestHead,
                                                               query: query,
                                                               pathShape: .null)
             
-            defaultOperationDelegate.handleResponseForInvalidOperation(
-                requestHead: smokeHTTP1RequestHead,
-                message: reason,
-                responseHandler: responseHandler)
+            defaultOperationDelegate.handleResponseForInvalidOperation(requestHead: smokeHTTP1RequestHead,
+                                                                       message: reason,
+                                                                       responseHandler: responseHandler)
             return
         } catch {
             Log.error("Unexpected handler selection error: \(error))")
@@ -77,9 +75,8 @@ struct OperationServerHTTP1RequestHandler<ContextType, SelectorType>: HTTP1Reque
                                                               query: query,
                                                               pathShape: .null)
             
-            defaultOperationDelegate.handleResponseForInternalServerError(
-                requestHead: smokeHTTP1RequestHead,
-                responseHandler: responseHandler)
+            defaultOperationDelegate.handleResponseForInternalServerError(requestHead: smokeHTTP1RequestHead,
+                                                                          responseHandler: responseHandler)
             return
         }
         
@@ -88,7 +85,10 @@ struct OperationServerHTTP1RequestHandler<ContextType, SelectorType>: HTTP1Reque
                                                           pathShape: shape)
         
         // let it be handled
-        handler.handle(smokeHTTP1RequestHead, body: body, withContext: context,
-                       responseHandler: responseHandler, invocationStrategy: invocationStrategy)
+        handler.handle(smokeHTTP1RequestHead,
+                       body: body,
+                       withContext: context,
+                       responseHandler: responseHandler,
+                       invocationStrategy: invocationStrategy)
     }
 }

@@ -98,6 +98,10 @@ struct StandardHTTP1ResponseHandler: HTTP1ResponseHandler {
         // add the content length header and write the response head to the response
         headers.add(name: HTTP1Headers.contentLength, value: "\(bodySize)")
         
+        headers.add(name: "Access-Control-Allow-Origin", value: "*")
+        headers.add(name: "Access-Control-Allow-Credentials", value: "true")
+        headers.add(name: "Access-Control-Allow-Methods", value: "GET,POST,PATCH,DELETE,PUT")
+
         // add any additional headers
         responseComponents.additionalHeaders.forEach { header in
             headers.add(name: header.0, value: header.1)
