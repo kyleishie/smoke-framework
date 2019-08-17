@@ -105,12 +105,6 @@ struct StandardHTTP1ResponseHandler: HTTP1ResponseHandler {
             headers.add(name: header.0, value: header.1)
         }
         
-        if !headers.contains(name: "Access-Control-Allow-Origin") {
-            headers.add(name: "Access-Control-Allow-Origin", value: "*")
-            headers.add(name: "Access-Control-Allow-Credentials", value: "true")
-            headers.add(name: "Access-Control-Allow-Methods", value: "GET,POST,PATCH,DELETE,PUT")
-        }
-        
         ctx.write(self.wrapOutboundOut(.head(HTTPResponseHead(version: requestHead.version,
                                                               status: status,
                                                               headers: headers))), promise: nil)
